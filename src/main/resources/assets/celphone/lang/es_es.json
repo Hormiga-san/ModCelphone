@@ -1,7 +1,10 @@
 {
   "item.celphone.celular": "Celular",
   "item.celphone.placa_electronica": "Placa Electronica",
+  "item.celphone.pepita_plastico": "Pepita de plastico",
+  "item.celphone.lingote_plastico": "Lingote de plastico",
+  "item.celphone.plastico_bruto": "Plastico en bruto",
   "block.celphone.plastic_block": "Ore de Plastico",
-  "block.celphone.raw_plastic_block": "Ore de Plastico viejo",
+  "block.celphone.mena_plastico": "Mena de Plastico",
   "creativetab,tutorial_tab": "Receta Celular"
 }

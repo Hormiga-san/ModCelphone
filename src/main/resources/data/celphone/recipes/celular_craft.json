@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "#i#",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:iron_block"
+    },
+    "i": {
+      "item": "celphone:placa_electronica"
+    }
+  },
+  "result": {
+    "item": "celphone:celular"
+  }
+}

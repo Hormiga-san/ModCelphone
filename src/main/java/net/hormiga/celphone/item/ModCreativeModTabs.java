@@ -23,7 +23,10 @@ public class ModCreativeModTabs {
                         pOutput.accept(CellPhoneItem.PLACA_ELECTRONICA.get());
                         pOutput.accept(Items.DIAMOND);
                         pOutput.accept(ModBlocks.PLASTIC_BLOCK.get());
-                        pOutput.accept(ModBlocks.RAW_PLASTIC_BLOCK.get());
+                        pOutput.accept(CellPhoneItem.PEPITA_PLASTICO.get());
+                        pOutput.accept(CellPhoneItem.LINGOTE_PLASTICO.get());
+                        pOutput.accept(CellPhoneItem.PLASTICO_BRUTO.get());
+                        pOutput.accept(ModBlocks.MENA_PLASTICO.get());
                     })
                     .build());
 

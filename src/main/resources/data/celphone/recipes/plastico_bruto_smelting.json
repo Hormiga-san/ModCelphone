@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "celphone:plastico_bruto"
+  },
+  "result": {
+    "item":"celphone:lingote_plastico"
+  },
+  "experience": 0.2,
+  "cookingtime": 150
+}

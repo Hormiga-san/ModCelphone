@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "GDG",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "celphone:plastic_block"
+    },
+    "G": {
+      "item": "minecraft:gold_block"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "item": "celphone:placa_electronica",
+    "count": 2
+  }
+}

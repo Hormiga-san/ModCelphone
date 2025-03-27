@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "iii",
+    "iii",
+    "iii"
+  ],
+  "key": {
+    "i": {
+      "item": "celphone:lingote_plastico"
+    }
+  },
+  "result": {
+    "item": "celphone:plastic_block",
+    "count": 1
+  }
+}
