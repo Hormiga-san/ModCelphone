@@ -1,6 +1,8 @@
 package net.hormiga.celphone;
 
 import com.mojang.logging.LogUtils;
+import net.hormiga.celphone.item.CellPhoneItem;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -24,6 +26,9 @@ public class CelPhoneMain {
 
     public CelPhoneMain(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
+
+        CellPhoneItem.register(modEventBus);
+
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
@@ -34,9 +39,10 @@ public class CelPhoneMain {
     }
 
 
-    private void addCreative(BuildCreativeModeTabContentsEvent event)
-    {
-
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+         if(event.getTabKey() == CreativeModeTabs.INGREDIENTS){
+             event.accept(CellPhoneItem.CELULAR);
+         }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
