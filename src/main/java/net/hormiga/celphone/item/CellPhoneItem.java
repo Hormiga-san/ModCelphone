@@ -12,7 +12,8 @@ public class CellPhoneItem {
             DeferredRegister.create(ForgeRegistries.ITEMS, CelPhoneMain.MOD_ID);
     public static final RegistryObject<Item> CELULAR = ITEMS.register("celular",
             () -> new Item(new Item.Properties()));
-
+    public static final RegistryObject<Item> PLACA_ELECTRONICA = ITEMS.register("placa_electronica",
+            () -> new Item(new Item.Properties()));
     public static void register(IEventBus eventBus){
         ITEMS.register(eventBus);
     }

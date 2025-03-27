@@ -1,7 +1,9 @@
 package net.hormiga.celphone;
 
 import com.mojang.logging.LogUtils;
+import net.hormiga.celphone.block.ModBlocks;
 import net.hormiga.celphone.item.CellPhoneItem;
+import net.hormiga.celphone.item.ModCreativeModTabs;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -27,7 +29,9 @@ public class CelPhoneMain {
     public CelPhoneMain(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
+        ModCreativeModTabs.register(modEventBus);
         CellPhoneItem.register(modEventBus);
+        ModBlocks.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
@@ -42,6 +46,7 @@ public class CelPhoneMain {
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
          if(event.getTabKey() == CreativeModeTabs.INGREDIENTS){
              event.accept(CellPhoneItem.CELULAR);
+             event.accept(CellPhoneItem.PLACA_ELECTRONICA);
          }
     }
 
