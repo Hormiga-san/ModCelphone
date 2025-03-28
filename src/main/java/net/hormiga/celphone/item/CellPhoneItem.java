@@ -1,6 +1,7 @@
 package net.hormiga.celphone.item;
 
 import net.hormiga.celphone.CelPhoneMain;
+import net.hormiga.celphone.item.custom.CelularItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -11,7 +12,7 @@ public class CellPhoneItem {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, CelPhoneMain.MOD_ID);
     public static final RegistryObject<Item> CELULAR = ITEMS.register("celular",
-            () -> new Item(new Item.Properties()));
+            () -> new CelularItem(new Item.Properties()));
     public static final RegistryObject<Item> PLACA_ELECTRONICA = ITEMS.register("placa_electronica",
             () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> PEPITA_PLASTICO = ITEMS.register("pepita_plastico",
