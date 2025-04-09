@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import net.hormiga.celphone.block.ModBlocks;
 import net.hormiga.celphone.item.CellPhoneItem;
 import net.hormiga.celphone.item.ModCreativeModTabs;
+import net.hormiga.celphone.registry.ModSounds;
+import net.hormiga.celphone.registry.ModSounds.*;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -17,6 +19,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
+import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.Mixins;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CelPhoneMain.MOD_ID)
@@ -32,11 +36,18 @@ public class CelPhoneMain {
         ModCreativeModTabs.register(modEventBus);
         CellPhoneItem.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModSounds.register(FMLJavaModLoadingContext.get().getModEventBus());
+
 
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
     }
+    static {
+        MixinBootstrap.init();
+        Mixins.addConfiguration("mixins.celphone.json");
+    }
+
 
     private void commonSetup(final FMLCommonSetupEvent event) {
 
