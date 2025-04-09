@@ -4,8 +4,6 @@ import com.mojang.logging.LogUtils;
 import net.hormiga.celphone.block.ModBlocks;
 import net.hormiga.celphone.item.CellPhoneItem;
 import net.hormiga.celphone.item.ModCreativeModTabs;
-import net.hormiga.celphone.registry.ModSounds;
-import net.hormiga.celphone.registry.ModSounds.*;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -14,7 +12,6 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -36,7 +33,6 @@ public class CelPhoneMain {
         ModCreativeModTabs.register(modEventBus);
         CellPhoneItem.register(modEventBus);
         ModBlocks.register(modEventBus);
-        ModSounds.register(FMLJavaModLoadingContext.get().getModEventBus());
 
 
         modEventBus.addListener(this::commonSetup);

@@ -121,8 +121,9 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
 
-    mavenCentral()
     maven { url 'https://jitpack.io' }
+
+    mavenCentral()
 
 }
 
@@ -136,7 +137,10 @@ dependencies {
 
     implementation 'com.github.WaterMediaTeam.watermedia:build:2.0.75'
 
+    implementation 'uk.co.caprica:vlcj:4.7.1'
+
     implementation 'org.spongepowered:mixin:0.8.5' // Versión recomendada para 1.20.1
+
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 

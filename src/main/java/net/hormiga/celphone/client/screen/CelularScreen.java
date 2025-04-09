@@ -215,7 +215,7 @@ public class CelularScreen extends Screen {
 
                 for (int i = start; i < end; i++) {
                     Cancion c = resultados.get(i);
-                    String textoCompleto = c.titulo + " - " + c.artista;
+                    String textoCompleto = c.getTitulo() + " - " + c.getArtista();
                     String texto = textoCompleto.length() > 50 ? textoCompleto.substring(0, 47) + "..." : textoCompleto;
 
                     graphics.drawString(this.font, texto, baseX + 6, baseY + (i - start) * 14, 0xAAAAAA);
@@ -273,7 +273,7 @@ public class CelularScreen extends Screen {
                     mouseY >= yLinea && mouseY <= yLinea + 12) {
 
                 Cancion seleccionada = resultados.get(i);
-                System.out.println("🎶 Seleccionada: " + seleccionada.titulo);
+                System.out.println("🎶 Seleccionada: " + seleccionada.getTitulo());
 
                 // Guardar en JSON
                 try {

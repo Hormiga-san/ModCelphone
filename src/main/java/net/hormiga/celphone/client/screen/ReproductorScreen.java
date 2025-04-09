@@ -1,9 +1,9 @@
 package net.hormiga.celphone.client.screen;
 
 import com.google.gson.Gson;
-import net.hormiga.celphone.audio.URLSoundPlayer;
+import net.hormiga.celphone.audio.VolumeSlider;
 import net.hormiga.celphone.data.Cancion;
-import net.hormiga.celphone.util.YTDLPHelper;
+import net.hormiga.celphone.media.CelphoneMediaPlayer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -26,7 +26,7 @@ public class ReproductorScreen extends Screen {
         this.lista = lista;
         this.indiceActual = indiceActual;
         this.onSalir = onSalir;
-        this.tituloCancion = lista.get(indiceActual).titulo + " - " + lista.get(indiceActual).artista;
+        this.tituloCancion = lista.get(indiceActual).getTitulo() + " - " + lista.get(indiceActual).getArtista();
     }
 
     @Override
@@ -37,75 +37,47 @@ public class ReproductorScreen extends Screen {
         int centerX = this.width / 2;
         int centerY = this.height / 2;
 
-        // Leer play.json
-        try {
-            String json = java.nio.file.Files.readString(java.nio.file.Path.of("modcelphone/play.json"));
-            Gson gson = new Gson();
-            Cancion c = gson.fromJson(json, Cancion.class);
-
-            System.out.println("🎧 Reproduciendo:");
-            System.out.println("ID: " + c.id);
-            System.out.println("Título: " + c.titulo);
-            System.out.println("Artista: " + c.artista);
-            System.out.println("URL: " + c.url);
-
-
-
-
-        } catch (Exception e) {
-            System.out.println("⚠️ No se pudo leer play.json: " + e.getMessage());
-        }
-
-        // Texto de la canción actual
-       /* this.addRenderableWidget(Button.builder(Component.literal("▶ Reproducir"), (b) -> {
-            Cancion actual = lista.get(indiceActual);
-            ClientData.streamPlayer.play(actual.url);
-            System.out.println("▶ Reproduciendo: " + actual.url);
-        }).pos(centerX - 80, centerY - 50).size(160, 20).build());*/
         this.addRenderableWidget(Button.builder(Component.literal("▶ Reproducir"), (b) -> {
-            System.out.println("🎧 Reproduciendo:");
-            System.out.println("ID: " + cancionSeleccionada.id);
-            System.out.println("Título: " + cancionSeleccionada.titulo);
-            System.out.println("Artista: " + cancionSeleccionada.artista);
-            System.out.println("URL: " + cancionSeleccionada.url);
+            if (cancionSeleccionada != null) {
+                System.out.println("🎧 Reproduciendo desde botón:");
+                System.out.println("ID: " + cancionSeleccionada.getId());
+                System.out.println("Título: " + cancionSeleccionada.getTitulo());
+                System.out.println("Artista: " + cancionSeleccionada.getArtista());
+                System.out.println("URL: " + cancionSeleccionada.getUrl());
 
-            URLSoundPlayer.playFromUrl(cancionSeleccionada.url);
-        }).pos(centerX - 80, centerY - 50).size(160, 20).build());
-
+                CelphoneMediaPlayer.stop();
+                CelphoneMediaPlayer.play(cancionSeleccionada.getUrl());
+            }
+        }).pos(centerX - 80, centerY - 60).size(160, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("⏸ Pausar"), (b) -> {
-            System.out.println("🔇 Pausar");
-            // Lógica futura de pausa
+            CelphoneMediaPlayer.pause();
+            System.out.println("⏸ Pausado");
+        }).pos(centerX - 80, centerY - 35).size(160, 20).build());
 
-        }).pos(centerX - 80, centerY - 20).size(160, 20).build());
+        this.addRenderableWidget(Button.builder(Component.literal("▶ Reanudar"), (b) -> {
+            CelphoneMediaPlayer.resume();
+            System.out.println("▶ Reanudado");
+        }).pos(centerX - 80, centerY - 10).size(160, 20).build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("🔉 Volumen -"), (b) -> {
-            System.out.println("🔉 Volumen abajo");
-        }).pos(centerX - 80, centerY + 10).size(75, 20).build());
+        this.addRenderableWidget(new VolumeSlider(centerX - 80, centerY + 15, 160, 20, 1.0));
 
-        this.addRenderableWidget(Button.builder(Component.literal("🔊 Volumen +"), (b) -> {
-            System.out.println("🔊 Volumen arriba");
-        }).pos(centerX + 5, centerY + 10).size(75, 20).build());
-
-        // ⏮ Botón anterior
         this.addRenderableWidget(Button.builder(Component.literal("⏮ Anterior"), (b) -> {
             if (indiceActual > 0) {
                 this.minecraft.setScreen(new ReproductorScreen(lista, indiceActual - 1, onSalir));
-
             }
-        }).pos(centerX - 80, centerY + 40).size(75, 20).build());
+        }).pos(centerX - 80, centerY + 45).size(75, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("⏭ Siguiente"), (b) -> {
             if (indiceActual < lista.size() - 1) {
                 this.minecraft.setScreen(new ReproductorScreen(lista, indiceActual + 1, onSalir));
-
             }
-        }).pos(centerX + 5, centerY + 40).size(75, 20).build());
+        }).pos(centerX + 5, centerY + 45).size(75, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("⬅ Volver"), (b) -> {
             this.onClose();
             if (onSalir != null) onSalir.run();
-        }).pos(centerX - 80, centerY + 70).size(160, 20).build());
+        }).pos(centerX - 80, centerY + 75).size(160, 20).build());
     }
     private void guardarPlayJson(Cancion cancion) {
         try {
