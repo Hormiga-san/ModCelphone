@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import net.hormiga.celphone.audio.VolumeSlider;
 import net.hormiga.celphone.data.Cancion;
 import net.hormiga.celphone.media.CelphoneMediaPlayer;
+import net.hormiga.celphone.util.YTDLPHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -11,6 +12,10 @@ import net.minecraft.network.chat.Component;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -31,73 +36,120 @@ public class ReproductorScreen extends Screen {
 
     @Override
     protected void init() {
-        this.cancionSeleccionada = lista.get(indiceActual);
-        guardarPlayJson(cancionSeleccionada); // también guarda el JSON al abrir
+        Cancion base = lista.get(indiceActual);
+
+        // Si no tiene URL, generarla al inicio
+        if (base.getUrl() == null || base.getUrl().isEmpty()) {
+            String nuevaUrl = YTDLPHelper.obtenerURLDirecta(base.getId());
+            if (nuevaUrl != null && !nuevaUrl.isEmpty()) {
+                base.setUrl(nuevaUrl);
+                lista.set(indiceActual, base); // actualiza el array
+            }
+        }
+
+        this.cancionSeleccionada = base;
+        // Reproducir
+        CelphoneMediaPlayer.stop();
+        CelphoneMediaPlayer.play(cancionSeleccionada.getUrl());
+
+        //verificaion de url vacia en este caso array
 
         int centerX = this.width / 2;
         int centerY = this.height / 2;
+        centerY += 50;
 
         this.addRenderableWidget(Button.builder(Component.literal("▶ Reproducir"), (b) -> {
-            if (cancionSeleccionada != null) {
-                System.out.println("🎧 Reproduciendo desde botón:");
-                System.out.println("ID: " + cancionSeleccionada.getId());
-                System.out.println("Título: " + cancionSeleccionada.getTitulo());
-                System.out.println("Artista: " + cancionSeleccionada.getArtista());
-                System.out.println("URL: " + cancionSeleccionada.getUrl());
-
-                CelphoneMediaPlayer.stop();
-                CelphoneMediaPlayer.play(cancionSeleccionada.getUrl());
-            }
+            CelphoneMediaPlayer.stop();
+            CelphoneMediaPlayer.play(cancionSeleccionada.getUrl());
         }).pos(centerX - 80, centerY - 60).size(160, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("⏸ Pausar"), (b) -> {
             CelphoneMediaPlayer.pause();
-            System.out.println("⏸ Pausado");
         }).pos(centerX - 80, centerY - 35).size(160, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("▶ Reanudar"), (b) -> {
             CelphoneMediaPlayer.resume();
-            System.out.println("▶ Reanudado");
         }).pos(centerX - 80, centerY - 10).size(160, 20).build());
 
         this.addRenderableWidget(new VolumeSlider(centerX - 80, centerY + 15, 160, 20, 1.0));
 
+        this.addRenderableWidget(Button.builder(Component.literal("⏭ Siguiente"), (b) -> {
+            if (indiceActual < lista.size() - 1) {
+                int nuevoIndice = indiceActual + 1;
+                Cancion siguiente = lista.get(nuevoIndice);
+
+                // Si la canción siguiente aún no tiene URL, se la generamos antes de reproducir
+                if (siguiente.getUrl() == null || siguiente.getUrl().isEmpty()|| siguiente.getUrl().contains("youtube.com")) {
+                    String url = YTDLPHelper.obtenerURLDirecta(siguiente.getId());
+                    if (url != null && !url.isEmpty()) {
+                        siguiente.setUrl(url);
+                    }
+                }
+
+                // ⚡ En segundo plano: transformar +2 y +3 si existen
+                new Thread(() -> {
+                    List<Cancion> extra = new ArrayList<>();
+                    for (int i = nuevoIndice + 1; i <= nuevoIndice + 2; i++) {
+                        if (i < lista.size()) {
+                            Cancion c = lista.get(i);
+                            if (c.getUrl() == null || c.getUrl().isEmpty()|| c.getUrl().contains("youtube.com")) {
+                                extra.add(c);
+                            }
+                        }
+                    }
+                    YTDLPHelper.transformarURLsEnParalelo(extra);
+                }).start();
+
+                // Avanzar a la nueva pantalla
+                this.minecraft.setScreen(new ReproductorScreen(lista, nuevoIndice, onSalir));
+            }
+        }).pos(centerX + 5, centerY + 45).size(75, 20).build());
+
+
+
         this.addRenderableWidget(Button.builder(Component.literal("⏮ Anterior"), (b) -> {
             if (indiceActual > 0) {
-                this.minecraft.setScreen(new ReproductorScreen(lista, indiceActual - 1, onSalir));
+                int nuevoIndice = indiceActual - 1;
+                Cancion anterior = lista.get(nuevoIndice);
+
+                // Si la canción anterior aún no tiene URL, se la generamos antes de reproducir
+                if (anterior.getUrl() == null || anterior.getUrl().isEmpty()|| anterior.getUrl().contains("youtube.com")) {
+                    String url = YTDLPHelper.obtenerURLDirecta(anterior.getId());
+                    if (url != null && !url.isEmpty()) {
+                        anterior.setUrl(url);
+                    }
+                }
+
+                // ⚡ En segundo plano: transformar -2 y -3 si existen
+                new Thread(() -> {
+                    List<Cancion> extra = new ArrayList<>();
+                    for (int i = nuevoIndice - 2; i < nuevoIndice; i++) {
+                        if (i >= 0) {
+                            Cancion c = lista.get(i);
+                            if (c.getUrl() == null || c.getUrl().isEmpty()|| c.getUrl().contains("youtube.com")) {
+                                extra.add(c);
+                            }
+                        }
+                    }
+                    YTDLPHelper.transformarURLsEnParalelo(extra);
+                }).start();
+
+                // Volver a la pantalla con la anterior canción
+                this.minecraft.setScreen(new ReproductorScreen(lista, nuevoIndice, onSalir));
             }
         }).pos(centerX - 80, centerY + 45).size(75, 20).build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("⏭ Siguiente"), (b) -> {
-            if (indiceActual < lista.size() - 1) {
-                this.minecraft.setScreen(new ReproductorScreen(lista, indiceActual + 1, onSalir));
-            }
-        }).pos(centerX + 5, centerY + 45).size(75, 20).build());
+
 
         this.addRenderableWidget(Button.builder(Component.literal("⬅ Volver"), (b) -> {
             this.onClose();
             if (onSalir != null) onSalir.run();
         }).pos(centerX - 80, centerY + 75).size(160, 20).build());
     }
-    private void guardarPlayJson(Cancion cancion) {
-        try {
-            Gson gson = new Gson();
-            String json = gson.toJson(cancion);
-
-            File archivo = new File("modcelphone/play.json");
-            archivo.getParentFile().mkdirs(); // asegura que la carpeta existe
-            FileWriter fw = new FileWriter(archivo);
-
-            fw.write(json);
-            fw.close();
-            System.out.println("✅ play.json guardado en: " + archivo.getAbsolutePath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+
         this.renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTicks);
 

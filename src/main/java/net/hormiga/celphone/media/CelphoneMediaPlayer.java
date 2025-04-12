@@ -61,5 +61,10 @@ public class CelphoneMediaPlayer {
     public static boolean isPlaying() {
         return player != null && player.status().isPlaying();
     }
+
+    public static boolean isPlayingUrl(String url) {
+        return player != null && player.status().isPlaying() && url.equals(currentUrl);
+    }
+
 }
 

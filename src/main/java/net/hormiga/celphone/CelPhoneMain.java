@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.hormiga.celphone.block.ModBlocks;
 import net.hormiga.celphone.item.CellPhoneItem;
 import net.hormiga.celphone.item.ModCreativeModTabs;
+import net.hormiga.celphone.util.BackendLauncher;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -34,10 +35,13 @@ public class CelPhoneMain {
         CellPhoneItem.register(modEventBus);
         ModBlocks.register(modEventBus);
 
-
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
+        BackendLauncher.iniciarBackend();
+
+
+
     }
     static {
         MixinBootstrap.init();

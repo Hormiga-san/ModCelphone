@@ -135,6 +135,8 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.10.1'
 
+    implementation 'black.ninia:jep:4.1.1'
+
     implementation 'com.github.WaterMediaTeam.watermedia:build:2.0.75'
 
     implementation 'uk.co.caprica:vlcj:4.7.1'
@@ -202,6 +204,8 @@ tasks.withType(JavaCompile).configureEach {
 }
 shadowJar {
     archiveClassifier.set('all')
+    mergeServiceFiles()
+
 
 }
 
