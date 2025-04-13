@@ -20,7 +20,7 @@ import java.util.List;
 
 
 public class ReproductorScreen extends Screen {
-    private final String tituloCancion;
+    private String tituloCancion;
     private final Runnable onSalir;
     private List<Cancion> lista;
     private int indiceActual;
@@ -49,8 +49,12 @@ public class ReproductorScreen extends Screen {
 
         this.cancionSeleccionada = base;
         // Reproducir
-        CelphoneMediaPlayer.stop();
-        CelphoneMediaPlayer.play(cancionSeleccionada.getUrl());
+        // Solo reproducir si no está sonando ya
+        if (!CelphoneMediaPlayer.isPlayingUrl(cancionSeleccionada.getUrl()) && !CelphoneMediaPlayer.isPaused()) {
+            //CelphoneMediaPlayer.stop();
+            CelphoneMediaPlayer.play(cancionSeleccionada.getUrl());
+        }
+
 
         //verificaion de url vacia en este caso array
 
@@ -101,7 +105,13 @@ public class ReproductorScreen extends Screen {
                 }).start();
 
                 // Avanzar a la nueva pantalla
-                this.minecraft.setScreen(new ReproductorScreen(lista, nuevoIndice, onSalir));
+                //this.minecraft.setScreen(new ReproductorScreen(lista, nuevoIndice, onSalir));
+                this.indiceActual = nuevoIndice;
+                this.cancionSeleccionada = siguiente;
+                this.tituloCancion = siguiente.getTitulo() + " - " + siguiente.getArtista();
+
+                CelphoneMediaPlayer.stop();
+                CelphoneMediaPlayer.play(siguiente.getUrl());
             }
         }).pos(centerX + 5, centerY + 45).size(75, 20).build());
 
@@ -135,7 +145,15 @@ public class ReproductorScreen extends Screen {
                 }).start();
 
                 // Volver a la pantalla con la anterior canción
-                this.minecraft.setScreen(new ReproductorScreen(lista, nuevoIndice, onSalir));
+                //this.minecraft.setScreen(new ReproductorScreen(lista, nuevoIndice, onSalir));
+                // this.minecraft.setScreen(new ReproductorScreen(lista, nuevoIndice, onSalir));
+                this.indiceActual = nuevoIndice;
+                this.cancionSeleccionada = anterior;
+                this.tituloCancion = anterior.getTitulo() + " - " + anterior.getArtista();
+
+                CelphoneMediaPlayer.stop();
+                CelphoneMediaPlayer.play(anterior.getUrl());
+
             }
         }).pos(centerX - 80, centerY + 45).size(75, 20).build());
 
@@ -158,6 +176,32 @@ public class ReproductorScreen extends Screen {
 
         graphics.drawCenteredString(this.font, "🎵 Reproduciendo:", centerX, y, 0xFFFFFF);
         graphics.drawCenteredString(this.font, tituloCancion, centerX, y + 12, 0xAAAAAA);
+    }
+    private void reproducirCancionActual() {
+        Cancion actual = lista.get(indiceActual);
+
+        if (actual.getUrl() == null || actual.getUrl().isEmpty() || actual.getUrl().contains("youtube.com")) {
+            String nuevaUrl = YTDLPHelper.obtenerURLDirecta(actual.getId());
+            if (nuevaUrl != null && !nuevaUrl.isEmpty()) {
+                actual.setUrl(nuevaUrl);
+                lista.set(indiceActual, actual);
+            }
+        }
+
+        this.cancionSeleccionada = actual;
+        this.tituloCancion = actual.getTitulo() + " - " + actual.getArtista();
+
+        CelphoneMediaPlayer.stop();
+        CelphoneMediaPlayer.play(actual.getUrl());
+    }
+
+
+    public void cambiarCancion(int nuevoIndice) {
+        if (nuevoIndice != this.indiceActual) {
+            this.indiceActual = nuevoIndice;
+            // ⚠️ Agregá aquí lo necesario para reiniciar la reproducción correctamente
+            reproducirCancionActual(); // o el método que uses internamente
+        }
     }
 
     @Override

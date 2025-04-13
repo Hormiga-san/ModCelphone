@@ -1,6 +1,7 @@
 package net.hormiga.celphone.client.screen;
 
 import com.google.gson.Gson;
+import net.hormiga.celphone.ClientData;
 import net.hormiga.celphone.data.Cancion;
 import net.hormiga.celphone.util.YTDLPHelper;
 import net.minecraft.client.Minecraft;
@@ -26,7 +27,7 @@ public class CelularScreen extends Screen {
     private String mensajeError = "";
     private List<Cancion> resultados = new ArrayList<>();
     private int scrollOffset = 0;
-    private final int maxVisibleResultados = 15;
+    private final int maxVisibleResultados = 10;
     private List<Cancion> cancionesEnMemoria = new ArrayList<>();
     //private final int maxVisibleResultados = 12;
     public CelularScreen() {
@@ -47,7 +48,7 @@ public class CelularScreen extends Screen {
         buscador.setMaxLength(100);
         this.addRenderableWidget(buscador);
         currentY += 30;
-
+        // Buscar cancion
         this.addRenderableWidget(Button.builder(Component.literal("🔍 Buscar canción"), (button) -> {
             String texto = buscador.getValue().trim();
             if (!texto.isEmpty()) {
@@ -77,7 +78,7 @@ public class CelularScreen extends Screen {
                             List<Cancion> lista = gson.fromJson(response.toString(), new TypeToken<List<Cancion>>() {}.getType());
 
                             if (lista != null && !lista.isEmpty()) {
-                                cancionesEnMemoria = lista; // Solo se cargan los títulos, sin URLs válidas aún
+                                ClientData.cancionesEnMemoria = lista; // Solo se cargan los títulos, sin URLs válidas aún
                                 mensajeError = "";
                                 System.out.println("✅ Búsqueda cargada en memoria.");
                             } else {
@@ -139,7 +140,7 @@ public class CelularScreen extends Screen {
                             List<Cancion> lista = gson.fromJson(response.toString(), new TypeToken<List<Cancion>>() {}.getType());
 
                             if (lista != null && !lista.isEmpty()) {
-                                cancionesEnMemoria = lista; // ✅ Solo guardamos, sin transformar
+                                ClientData.cancionesEnMemoria = lista; // ✅ Solo guardamos, sin transformar
                                 mensajeError = "";
                                 System.out.println("✅ Playlist cargada en memoria. URLs aún no transformadas.");
                             } else {
@@ -161,19 +162,24 @@ public class CelularScreen extends Screen {
         }).pos(paddingX, currentY).size(160, 20).build());
 
 
-
         currentY += 30;
 
         // Botón "Reproduciendo..."
         this.addRenderableWidget(Button.builder(Component.literal("🎧 Reproduciendo..."), (b) -> {
-            if (cancionesEnMemoria != null && !cancionesEnMemoria.isEmpty()) {
-                this.minecraft.setScreen(new ReproductorScreen(
-                        cancionesEnMemoria, 0, () -> this.minecraft.setScreen(this)
-                ));
+            if (ClientData.reproductorScreenActual != null) {
+                this.minecraft.setScreen(ClientData.reproductorScreenActual);
+            } else if (ClientData.cancionesEnMemoria != null && !ClientData.cancionesEnMemoria.isEmpty()) {
+                ClientData.reproductorScreenActual = new ReproductorScreen(
+                        ClientData.cancionesEnMemoria,
+                        0,
+                        () -> this.minecraft.setScreen(this)
+                );
+                this.minecraft.setScreen(ClientData.reproductorScreenActual);
             } else {
                 mensajeError = "⚠️ No hay canciones cargadas.";
             }
         }).pos(paddingX, currentY).size(160, 20).build());
+
     }
 
 
@@ -186,20 +192,22 @@ public class CelularScreen extends Screen {
         graphics.fill(x, y, x + guiWidth * 2 + 20, y + guiHeight, 0xFF1E1E1E);
         super.render(graphics, mouseX, mouseY, partialTicks);
 
-        // ✅ Usar cancionesEnMemoria directamente
-        List<Cancion> visibles = cancionesEnMemoria != null ? cancionesEnMemoria : new ArrayList<>();
+        List<Cancion> visibles = ClientData.cancionesEnMemoria != null ? ClientData.cancionesEnMemoria : new ArrayList<>();
 
         int baseX = x + guiWidth + 10;
         int baseY = y + 20;
 
-        int start = Math.min(scrollOffset, Math.max(0, visibles.size() - maxVisibleResultados));
+        int start = scrollOffset;
         int end = Math.min(visibles.size(), start + maxVisibleResultados);
 
         for (int i = start; i < end; i++) {
             Cancion c = visibles.get(i);
             String texto = c.getTitulo() + " - " + c.getArtista();
             if (texto.length() > 50) texto = texto.substring(0, 47) + "...";
-            graphics.drawString(this.font, texto, baseX + 6, baseY + (i - start) * 14, 0xAAAAAA);
+
+            int yLinea = baseY + (i - start) * 14;
+            graphics.fill(baseX, yLinea, baseX + guiWidth, yLinea + 12, 0x33222222);
+            graphics.drawString(this.font, texto, baseX + 6, yLinea, 0xAAAAAA);
         }
 
         if (!mensajeError.isEmpty()) {
@@ -208,42 +216,48 @@ public class CelularScreen extends Screen {
     }
 
 
+
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (delta > 0 && scrollOffset > 0) scrollOffset--;
-        else if (delta < 0 && scrollOffset < Math.max(0, resultados.size() - maxVisibleResultados)) scrollOffset++;
+        List<Cancion> canciones = ClientData.cancionesEnMemoria;
+        if (canciones == null || canciones.isEmpty()) return super.mouseScrolled(mouseX, mouseY, delta);
+
+        int maxOffset = Math.max(0, canciones.size() - maxVisibleResultados);
+
+        if (delta > 0 && scrollOffset > 0) {
+            scrollOffset--;
+        } else if (delta < 0 && scrollOffset < maxOffset) {
+            scrollOffset++;
+        }
+
         return true;
     }
 
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-
         int x = (this.width - (guiWidth * 2 + 20)) / 2;
         int y = (this.height - guiHeight) / 2;
 
         int baseX = x + guiWidth + 10;
         int baseY = y + 20;
+        List<Cancion> canciones = ClientData.cancionesEnMemoria;
+        if (canciones == null || canciones.isEmpty()) return super.mouseClicked(mouseX, mouseY, button);
 
-        if (cancionesEnMemoria == null || cancionesEnMemoria.isEmpty()) return super.mouseClicked(mouseX, mouseY, button);
-
-        int start = Math.min(scrollOffset, Math.max(0, cancionesEnMemoria.size() - maxVisibleResultados));
-        int end = Math.min(cancionesEnMemoria.size(), start + maxVisibleResultados);
-
+        int start = Math.min(scrollOffset, Math.max(0, canciones.size() - maxVisibleResultados));
+        int end = Math.min(canciones.size(), start + maxVisibleResultados);
         for (int i = start; i < end; i++) {
             int yLinea = baseY + (i - start) * 14;
 
             if (mouseX >= baseX && mouseX <= baseX + guiWidth &&
                     mouseY >= yLinea && mouseY <= yLinea + 12) {
 
-                System.out.println("🎶 Seleccionada: " + cancionesEnMemoria.get(i).getTitulo());
-
+                System.out.println("🎶 Seleccionada: " + canciones.get(i).getTitulo());
                 // 🔁 Transformar la seleccionada y 2 vecinas (-2, -1, actual, +1, +2)
                 List<Cancion> sublista = new ArrayList<>();
                 for (int j = i - 2; j <= i + 2; j++) {
-                    System.out.println("for"+ j);
-                    if (j >= 0 && j < cancionesEnMemoria.size()) {
-                        Cancion c = cancionesEnMemoria.get(j);
-                        System.out.println("aaaaaaaaaaaaAAAAAAIF");
+                    if (j >= 0 && j < canciones.size()) {
+                        Cancion c = canciones.get(j);
                         if (c.getUrl() == null || c.getUrl().isEmpty() || c.getUrl().contains("youtube.com")) {
                             System.out.println("🔍 URL vacía para: " + c.getTitulo());
                             sublista.add(c);
@@ -256,24 +270,28 @@ public class CelularScreen extends Screen {
                 YTDLPHelper.transformarURLsEnParalelo(sublista);
 
                 // ✅ Abrimos reproductor con la lista original
-                this.minecraft.setScreen(new ReproductorScreen(
-                        cancionesEnMemoria,
-                        i,
-                        () -> this.minecraft.setScreen(this)
-                ));
+                if (ClientData.reproductorScreenActual == null) {
+                    ClientData.reproductorScreenActual = new ReproductorScreen(
+                            canciones,
+                            i,
+                            () -> this.minecraft.setScreen(this)
+                    );
+                } else {
+                    // Actualizamos solo el índice actual
+                    ClientData.reproductorScreenActual.cambiarCancion(i);
+                }
+
+                this.minecraft.setScreen(ClientData.reproductorScreenActual);
+
+                System.out.println("✅ Se guardó reproductor en ClientData");
+
+
                 return true;
             }
         }
 
         return super.mouseClicked(mouseX, mouseY, button);
     }
-
-
-
-
-
-
-
     @Override
     public boolean isPauseScreen() {
         return false;

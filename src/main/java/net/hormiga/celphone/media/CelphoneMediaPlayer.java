@@ -12,13 +12,20 @@ public class CelphoneMediaPlayer {
 
     public static void play(String urlString) {
         try {
-            URL url = new URL(urlString); // convierte String → URL
+            if (isPlayingUrl(urlString)) {
+                System.out.println("[Celphone] Ya se está reproduciendo esta URL.");
+                return; // ❌ Evita reiniciar la misma canción
+            }
+
+            stop(); // detené lo que haya antes
+
+            URL url = new URL(urlString);
             System.out.println("[Celphone] Reproduciendo desde: " + url);
 
             factory = new MediaPlayerFactory();
             player = factory.mediaPlayers().newMediaPlayer();
 
-            player.media().start(url); // ✅ método que acepta URL
+            player.media().start(url);
             currentUrl = urlString;
 
         } catch (Exception e) {
@@ -26,6 +33,8 @@ public class CelphoneMediaPlayer {
             System.out.println("❌ URL inválida: " + urlString);
         }
     }
+
+
     public static void setVolume(int volume) {
         if (player != null) {
             player.audio().setVolume(volume);
@@ -56,6 +65,9 @@ public class CelphoneMediaPlayer {
             factory = null;
         }
         currentUrl = "";
+    }
+    public static boolean isPaused() {
+        return player != null && !player.status().isPlaying() && player.status().canPause();
     }
 
     public static boolean isPlaying() {
