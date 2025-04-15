@@ -77,6 +77,20 @@ public class CelphoneMediaPlayer {
     public static boolean isPlayingUrl(String url) {
         return player != null && player.status().isPlaying() && url.equals(currentUrl);
     }
+    public static long getTime() {
+        return player != null ? player.status().time() : 0;
+    }
+
+    public static long getLength() {
+        return player != null ? player.media().info().duration() : 0;
+    }
+
+    public static void seek(long millis) {
+        if (player != null) {
+            player.controls().setTime(millis);
+        }
+    }
+
 
 }
 

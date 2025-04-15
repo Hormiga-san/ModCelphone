@@ -1,5 +1,5 @@
 {
-  "required": true,
+  "required": false,
   "package": "net.hormiga.celphone.mixin",
   "refmap": "mixins.celphone.refmap.json",
   "compatibilityLevel": "JAVA_17",

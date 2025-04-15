@@ -176,7 +176,61 @@ public class ReproductorScreen extends Screen {
 
         graphics.drawCenteredString(this.font, "🎵 Reproduciendo:", centerX, y, 0xFFFFFF);
         graphics.drawCenteredString(this.font, tituloCancion, centerX, y + 12, 0xAAAAAA);
+        long actual = CelphoneMediaPlayer.getTime();
+        long total = CelphoneMediaPlayer.getLength();
+
+        if (total > 0) {
+            int barX = this.width / 2 - 80;
+            int barY = this.height / 2 - 27;
+            int barWidth = 160;
+            int barHeight = 6;
+
+            float progress = (float) actual / total;
+            int filledWidth = (int) (progress * barWidth);
+
+            graphics.fill(barX, barY, barX + barWidth, barY + barHeight, 0xFF444444);
+            graphics.fill(barX, barY, barX + filledWidth, barY + barHeight, 0xFF22AAFF);
+
+            graphics.drawString(this.font, formatTime(actual), barX, barY - 10, 0xAAAAAA);
+            graphics.drawString(this.font, formatTime(total), barX + barWidth - 30, barY - 10, 0xAAAAAA);
+        }
+
     }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        int barX = this.width / 2 - 80;
+        int barY = this.height / 2 - 27;
+        int barWidth = 160;
+        int barHeight = 6;
+
+        if (mouseX >= barX && mouseX <= barX + barWidth &&
+                mouseY >= barY && mouseY <= barY + barHeight) {
+
+            long total = CelphoneMediaPlayer.getLength();
+            float porcentaje = (float) (mouseX - barX) / barWidth;
+            long nuevoTiempo = (long) (porcentaje * total);
+
+            CelphoneMediaPlayer.seek(nuevoTiempo);
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public void tick() {
+        long actual = CelphoneMediaPlayer.getTime();
+        long total = CelphoneMediaPlayer.getLength();
+
+        if (total > 0 && actual >= total - 1000) { // margen de 1 segundo para evitar bugs por precisión
+            if (indiceActual < lista.size() - 1) {
+                int nuevoIndice = indiceActual + 1;
+                cambiarCancion(nuevoIndice);
+            }
+        }
+    }
+
     private void reproducirCancionActual() {
         Cancion actual = lista.get(indiceActual);
 
@@ -208,5 +262,12 @@ public class ReproductorScreen extends Screen {
     public boolean isPauseScreen() {
         return false;
     }
+    private String formatTime(long millis) {
+        long seconds = millis / 1000;
+        long minutes = seconds / 60;
+        seconds %= 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
 }
 

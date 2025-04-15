@@ -88,14 +88,14 @@ minecraft {
         client {
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
-            args "--mixin", "mixins.celphone.json"
+            //args "--mixin", "mixins.celphone.json"
 
         }
 
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
             args '--nogui'
-            args "--mixin", "mixins.celphone.json"
+            //args "--mixin", "mixins.celphone.json"
 
         }
 
@@ -202,20 +202,20 @@ publishing {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
+
+
 shadowJar {
     archiveClassifier.set('all')
     mergeServiceFiles()
-
-
 }
 
-jar {
-    enabled = false
+/*jar {
+
     manifest {
         attributes([
                 "MixinConfigs": "mixins.celphone.json"
         ])
     }
-}
+}*/
 
 build.dependsOn shadowJar

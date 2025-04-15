@@ -29,6 +29,7 @@ public class CelPhoneMain {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public CelPhoneMain(FMLJavaModLoadingContext context) {
+        System.out.println("✅ Cargando Celphone mod...");
         IEventBus modEventBus = context.getModEventBus();
 
         ModCreativeModTabs.register(modEventBus);
@@ -38,10 +39,7 @@ public class CelPhoneMain {
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
-        BackendLauncher.iniciarBackend();
-
-
-
+        System.out.println("✅ Celphone constructor completado");
     }
     static {
         MixinBootstrap.init();
@@ -50,6 +48,9 @@ public class CelPhoneMain {
 
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            BackendLauncher.iniciarBackend(); // 🔁 ahora es seguro
+        });
 
     }
 
